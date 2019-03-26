@@ -22,8 +22,8 @@ object MigrationDriver extends App with LazyLogging {
     .appName("test app")
     .getOrCreate
 
-  private val orderHeaderQuery = s"SELECT * FROM $orderHeaderTableName where date < $oneYearOldDate"
-  private val orderPositionQuery = s"SELECT * FROM $orderPositionTableName where date < $oneYearOldDate"
+  private val orderHeaderQuery = s"SELECT * FROM $orderHeaderTableName where date < $oneYearOldDate and date > $lastUploadDate"
+  private val orderPositionQuery = s"SELECT * FROM $orderPositionTableName where date < $oneYearOldDate and date > $lastUploadDate"
 
   import ss.implicits._
 
@@ -55,4 +55,5 @@ object MigrationDriver extends App with LazyLogging {
   }
 
   def oneYearOldDate: String = ??? // вычисление даты для "старых" данных
+  def lastUploadDate: String = ??? // вычисление даты (года и месяца) когда последний раз архивировались данные
 }
