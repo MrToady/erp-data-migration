@@ -22,8 +22,8 @@ object MigrationDriver extends App with LazyLogging {
     .appName("test app")
     .getOrCreate
 
-  private val orderHeaderQuery = s"SELECT * FROM $orderHeaderTableName"
-  private val orderPositionQuery = s"SELECT * FROM $orderPositionTableName"
+  private val orderHeaderQuery = s"SELECT * FROM $orderHeaderTableName where date < $oneYearOldDate"
+  private val orderPositionQuery = s"SELECT * FROM $orderPositionTableName where date < $oneYearOldDate"
 
   import ss.implicits._
 
@@ -31,14 +31,14 @@ object MigrationDriver extends App with LazyLogging {
     .as[OrderHeader]
     .map(prepareOrderHeaderToSave)
     .write
-    .partitionBy("yearMonth")
+    .partitionBy("year","month")
     .parquet(orderHeaderPath)
 
   dfFromQuery(ss, config.dBConfig, orderPositionTableName, orderPositionQuery)
     .as[OrderPosition]
     .map(prepareOrderPositionToSave)
     .write
-    .partitionBy("yearMonth")
+    .partitionBy("year","month")
     .parquet(orderPositionPath)
 
   val prepareOrderPositionToSave: OrderPosition => OrderPositionToSave = ??? //функции маппинга, добавление года и месяца для партиционирования
@@ -53,4 +53,6 @@ object MigrationDriver extends App with LazyLogging {
 
     spark.read.jdbc(config.url, table, properties)
   }
+
+  def oneYearOldDate: String = ??? // вычисление даты для "старых" данных
 }
