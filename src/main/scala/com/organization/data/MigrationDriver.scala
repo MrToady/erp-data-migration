@@ -24,6 +24,8 @@ object MigrationDriver extends App with LazyLogging {
 
   private val orderHeaderQuery = s"SELECT * FROM $orderHeaderTableName where date < $oneYearOldDate and date > $lastUploadDate"
   private val orderPositionQuery = s"SELECT * FROM $orderPositionTableName where date < $oneYearOldDate and date > $lastUploadDate"
+  private val prepareOrderPositionToSave: OrderPosition => OrderPositionToSave = ??? //функции маппинга, добавление года и месяца для партиционирования
+  private val prepareOrderHeaderToSave: OrderHeader => OrderHeaderToSave = ???
 
   import ss.implicits._
 
@@ -40,9 +42,6 @@ object MigrationDriver extends App with LazyLogging {
     .write
     .partitionBy("year","month")
     .parquet(orderPositionPath)
-
-  val prepareOrderPositionToSave: OrderPosition => OrderPositionToSave = ??? //функции маппинга, добавление года и месяца для партиционирования
-  val prepareOrderHeaderToSave: OrderHeader => OrderHeaderToSave = ???
 
   def dfFromQuery(spark: SparkSession, config: DBConfig, table: String, query: String) = {
     val properties = new Properties()
